@@ -12,18 +12,18 @@ interface AzureADCredentials {
 }
 
 export class AzureADIntegration extends BaseIntegration {
-  private credentials: AzureADCredentials;
-
   constructor(credentials: AzureADCredentials) {
     super(INTEGRATION_REGISTRY.azure_ad, credentials);
-    this.credentials = credentials;
+  }
+  
+  private getCredentials(): AzureADCredentials {
+    return this.credentials as AzureADCredentials;
   }
 
   async connect(): Promise<boolean> {
     try {
       // Get access token
-      const token = await this.getAccessToken();
-      this.credentials.accessToken = token;
+      await this.getAccessToken();
       return true;
     } catch (error) {
       console.error('Azure AD connection error:', error);
@@ -32,7 +32,6 @@ export class AzureADIntegration extends BaseIntegration {
   }
 
   async disconnect(): Promise<boolean> {
-    this.credentials.accessToken = undefined;
     return true;
   }
 
@@ -153,20 +152,21 @@ export class AzureADIntegration extends BaseIntegration {
   }
 
   private async getAccessToken(): Promise<string> {
-    if (this.credentials.accessToken) {
-      return this.credentials.accessToken;
+    const creds = this.getCredentials();
+    if (creds.accessToken) {
+      return creds.accessToken;
     }
 
     const response = await fetch(
-      `https://login.microsoftonline.com/${this.credentials.tenantId}/oauth2/v2.0/token`,
+      `https://login.microsoftonline.com/${creds.tenantId}/oauth2/v2.0/token`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          client_id: this.credentials.clientId,
-          client_secret: this.credentials.clientSecret,
+          client_id: creds.clientId,
+          client_secret: creds.clientSecret,
           scope: 'https://graph.microsoft.com/.default',
           grant_type: 'client_credentials',
         }),
@@ -174,7 +174,7 @@ export class AzureADIntegration extends BaseIntegration {
     );
 
     const data = await response.json();
-    this.credentials.accessToken = data.access_token;
+    (this.credentials as AzureADCredentials).accessToken = data.access_token;
     return data.access_token;
   }
 

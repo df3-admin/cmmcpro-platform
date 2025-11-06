@@ -12,17 +12,17 @@ interface GoogleWorkspaceCredentials {
 }
 
 export class GoogleWorkspaceIntegration extends BaseIntegration {
-  private credentials: GoogleWorkspaceCredentials;
-
   constructor(credentials: GoogleWorkspaceCredentials) {
     super(INTEGRATION_REGISTRY.google_workspace, credentials);
-    this.credentials = credentials;
+  }
+  
+  private getCredentials(): GoogleWorkspaceCredentials {
+    return this.credentials as GoogleWorkspaceCredentials;
   }
 
   async connect(): Promise<boolean> {
     try {
-      const token = await this.getAccessToken();
-      this.credentials.accessToken = token;
+      await this.getAccessToken();
       return true;
     } catch (error) {
       console.error('Google Workspace connection error:', error);
@@ -31,7 +31,6 @@ export class GoogleWorkspaceIntegration extends BaseIntegration {
   }
 
   async disconnect(): Promise<boolean> {
-    this.credentials.accessToken = undefined;
     return true;
   }
 
@@ -146,8 +145,9 @@ export class GoogleWorkspaceIntegration extends BaseIntegration {
   }
 
   private async getAccessToken(): Promise<string> {
-    if (this.credentials.accessToken) {
-      return this.credentials.accessToken;
+    const creds = this.getCredentials();
+    if (creds.accessToken) {
+      return creds.accessToken;
     }
 
     // Exchange refresh token for access token
@@ -157,15 +157,15 @@ export class GoogleWorkspaceIntegration extends BaseIntegration {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: this.credentials.clientId,
-        client_secret: this.credentials.clientSecret,
-        refresh_token: this.credentials.refreshToken,
+        client_id: creds.clientId,
+        client_secret: creds.clientSecret,
+        refresh_token: creds.refreshToken,
         grant_type: 'refresh_token',
       }),
     });
 
     const data = await response.json();
-    this.credentials.accessToken = data.access_token;
+    (this.credentials as GoogleWorkspaceCredentials).accessToken = data.access_token;
     return data.access_token;
   }
 

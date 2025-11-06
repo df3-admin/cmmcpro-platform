@@ -11,11 +11,12 @@ interface AWSCredentials {
 }
 
 export class AWSIntegration extends BaseIntegration {
-  private credentials: AWSCredentials;
-
   constructor(credentials: AWSCredentials) {
     super(INTEGRATION_REGISTRY.aws, credentials);
-    this.credentials = credentials;
+  }
+  
+  private getCredentials(): AWSCredentials {
+    return this.credentials as AWSCredentials;
   }
 
   async connect(): Promise<boolean> {
@@ -143,7 +144,8 @@ export class AWSIntegration extends BaseIntegration {
 
   private async syncCloudTrailLogs(): Promise<void> {
     // Get CloudTrail events
-    const endpoint = `https://cloudtrail.${this.credentials.region}.amazonaws.com/`;
+    const creds = this.getCredentials();
+    const endpoint = `https://cloudtrail.${creds.region}.amazonaws.com/`;
     const params = new URLSearchParams({
       Action: 'LookupEvents',
       Version: '2013-11-01',
@@ -156,7 +158,8 @@ export class AWSIntegration extends BaseIntegration {
 
   private async syncEC2Instances(): Promise<void> {
     // Get EC2 instances
-    const endpoint = `https://ec2.${this.credentials.region}.amazonaws.com/`;
+    const creds = this.getCredentials();
+    const endpoint = `https://ec2.${creds.region}.amazonaws.com/`;
     const params = new URLSearchParams({
       Action: 'DescribeInstances',
       Version: '2016-11-15',
@@ -204,7 +207,8 @@ export class AWSIntegration extends BaseIntegration {
   }
 
   private async collectCloudTrailEvidence(): Promise<CollectedEvidence> {
-    const endpoint = `https://cloudtrail.${this.credentials.region}.amazonaws.com/`;
+    const creds = this.getCredentials();
+    const endpoint = `https://cloudtrail.${creds.region}.amazonaws.com/`;
     const params = new URLSearchParams({
       Action: 'DescribeTrails',
       Version: '2013-11-01',
