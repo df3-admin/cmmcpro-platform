@@ -71,14 +71,14 @@ export default function RiskDashboardClient({
     return 'text-green-600 bg-green-50 border-green-200';
   };
 
-  const getSeverityBadge = (severity: string) => {
-    const variants = {
+  const getSeverityBadge = (severity: string): "default" | "destructive" | "outline" | "secondary" => {
+    const variants: Record<string, "destructive" | "outline" | "secondary"> = {
       critical: 'destructive',
       high: 'destructive',
       medium: 'outline',
       low: 'secondary',
     };
-    return variants[severity as keyof typeof variants] || 'secondary';
+    return variants[severity] || 'secondary';
   };
 
   const filteredControls = selectedFilter === 'all' 
