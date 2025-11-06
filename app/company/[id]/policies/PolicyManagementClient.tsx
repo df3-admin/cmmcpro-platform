@@ -31,8 +31,8 @@ interface Policy {
   controlIds: any;
   createdAt: Date;
   updatedAt: Date;
-  approvedAt?: Date;
-  creatorName?: string;
+  approvedAt?: Date | null;
+  creatorName?: string | null;
 }
 
 interface Props {
