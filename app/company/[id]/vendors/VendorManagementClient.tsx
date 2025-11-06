@@ -325,7 +325,7 @@ export default function VendorManagementClient({
                         )}
                       </div>
 
-                      {vendor.riskScore !== undefined && (
+                      {vendor.riskScore !== undefined && vendor.riskScore !== null && (
                         <div className="mt-3">
                           <div className="flex items-center justify-between text-xs mb-1">
                             <span>Risk Score</span>
