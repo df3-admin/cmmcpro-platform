@@ -4,7 +4,7 @@ import RiskDashboardClient from './RiskDashboardClient';
 import { db } from '@/lib/db';
 import { companies, controlProgress, evidence, monitoringChecks } from '@/lib/db/schema';
 import { eq, sql, and, desc } from 'drizzle-orm';
-import { CONTROL_DATA } from '@/shared/controls';
+import { CMMC_DATA } from '@/lib/cmmc/controls';
 
 export default async function RiskAssessmentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -54,8 +54,8 @@ export default async function RiskAssessmentPage({ params }: { params: Promise<{
 
   // Calculate risk scores for each control
   const controlRisks = controls.map(control => {
-    const controlData = CONTROL_DATA.level1.find(c => c.id === control.controlId) ||
-                        CONTROL_DATA.level2.find(c => c.id === control.controlId);
+    const controlData = CMMC_DATA.levels['1'].controls.find(c => c.id === control.controlId) ||
+                        CMMC_DATA.levels['2'].controls.find(c => c.id === control.controlId);
     
     const evidenceCount = evidenceCounts.find(e => e.controlId === control.controlId)?.count || 0;
     const latestCheck = monitoringResults.find(m => m.controlId === control.controlId);
@@ -99,7 +99,7 @@ export default async function RiskAssessmentPage({ params }: { params: Promise<{
       status: control.status,
       evidenceCount,
       riskScore,
-      severity: riskScore > 70 ? 'critical' : riskScore > 40 ? 'high' : riskScore > 20 ? 'medium' : 'low',
+      severity: (riskScore > 70 ? 'critical' : riskScore > 40 ? 'high' : riskScore > 20 ? 'medium' : 'low') as 'critical' | 'high' | 'medium' | 'low',
       isCritical,
       lastChecked: latestCheck?.checkedAt,
       monitoringStatus: latestCheck?.status,
