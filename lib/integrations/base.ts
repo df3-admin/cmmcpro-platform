@@ -36,7 +36,7 @@ export interface IntegrationConfig {
 }
 
 export interface IntegrationCredentials {
-  [key: string]: string | number | boolean;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface IntegrationStatus {
