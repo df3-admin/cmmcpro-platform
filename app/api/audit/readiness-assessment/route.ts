@@ -87,7 +87,16 @@ export async function POST(request: Request) {
 
     const isReady = overallReadiness >= 95; // 95% or higher is audit-ready
 
-    const assessment = {
+    const assessment: {
+      overallReadiness: number;
+      isReady: boolean;
+      breakdown: any;
+      recommendations: Array<{
+        priority: string;
+        area: string;
+        message: string;
+      }>;
+    } = {
       overallReadiness,
       isReady,
       breakdown: {
