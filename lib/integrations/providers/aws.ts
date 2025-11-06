@@ -7,6 +7,7 @@ interface AWSCredentials {
   accessKeyId: string;
   secretAccessKey: string;
   region: string;
+  [key: string]: string | number | boolean;
 }
 
 export class AWSIntegration extends BaseIntegration {

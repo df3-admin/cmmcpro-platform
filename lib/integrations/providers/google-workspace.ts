@@ -8,6 +8,7 @@ interface GoogleWorkspaceCredentials {
   clientSecret: string;
   refreshToken: string;
   accessToken?: string;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export class GoogleWorkspaceIntegration extends BaseIntegration {

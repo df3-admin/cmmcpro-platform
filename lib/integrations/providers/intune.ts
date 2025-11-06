@@ -8,6 +8,7 @@ interface IntuneCredentials {
   clientSecret: string;
   tenantId: string;
   accessToken?: string;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export class IntuneIntegration extends BaseIntegration {
