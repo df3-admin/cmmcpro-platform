@@ -89,7 +89,7 @@ export default function RiskDashboardClient({
                      overallRiskScore > 40 ? 'Moderate Risk' : 
                      overallRiskScore > 20 ? 'Low Risk' : 'Minimal Risk';
 
-  const riskTrend: 'stable' | 'improving' | 'worsening' = 'stable'; // In a real app, calculate from historical data
+  const riskTrend = 'stable' as 'stable' | 'improving' | 'worsening'; // In a real app, calculate from historical data
 
   return (
     <div className="space-y-8">
