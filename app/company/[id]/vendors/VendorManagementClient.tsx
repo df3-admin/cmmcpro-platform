@@ -184,7 +184,7 @@ export default function VendorManagementClient({
     }
   };
 
-  const getRiskBadge = (riskScore?: number) => {
+  const getRiskBadge = (riskScore?: number | null) => {
     if (!riskScore) return <Badge variant="outline">Not Assessed</Badge>;
     
     if (riskScore > 70) return <Badge variant="destructive">High Risk</Badge>;
