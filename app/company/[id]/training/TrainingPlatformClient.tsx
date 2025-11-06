@@ -25,15 +25,15 @@ import {
 interface TrainingSession {
   id: string;
   companyId: string;
-  userId?: string;
+  userId?: string | null;
   status: string;
-  scheduledDate?: Date;
-  completedDate?: Date;
-  instructorName?: string;
+  scheduledDate?: Date | null;
+  completedDate?: Date | null;
+  instructorName?: string | null;
   sessionType: string;
   isFreeSession: boolean;
-  meetingUrl?: string;
-  notes?: string;
+  meetingUrl?: string | null;
+  notes?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
