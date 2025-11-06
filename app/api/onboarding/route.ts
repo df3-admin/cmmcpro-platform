@@ -1,15 +1,22 @@
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
-import { companies, userCompanies, controlProgress } from '@/lib/db/schema';
+import { companies, userCompanies, controlProgress, users } from '@/lib/db/schema';
 import { getControlsByLevel } from '@/lib/cmmc/controls';
 import { NextResponse } from 'next/server';
+import { syncUser } from '@/lib/clerk/sync-user';
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
+    const { userId: clerkUserId } = await auth();
     
-    if (!session?.user?.id) {
+    if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Sync user to database
+    const user = await syncUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Failed to sync user' }, { status: 500 });
     }
 
     const data = await req.json();
@@ -33,7 +40,7 @@ export async function POST(req: Request) {
 
     // Link user to company
     await db.insert(userCompanies).values({
-      userId: session.user.id,
+      userId: user.id,
       companyId: company.id,
       role: 'owner',
     });

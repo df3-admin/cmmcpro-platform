@@ -1,4 +1,4 @@
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { integrationService } from '@/lib/integrations/service';
 import { db } from '@/lib/db';
@@ -7,7 +7,7 @@ import { and, eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
+    const { userId } = await auth();
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
           fileUrl: `data:application/json;base64,${Buffer.from(JSON.stringify(ev.data)).toString('base64')}`,
           fileType: 'application/json',
           fileSize: JSON.stringify(ev.data).length,
-          uploaderId: session.user.id,
+          uploaderId: userId,
           aiReviewStatus: ev.complianceStatus === 'compliant' ? 'approved' : 'needs_rework',
           aiFeedback: ev.findings?.join('\n'),
           aiConfidence: ev.confidence,
@@ -105,5 +105,6 @@ export async function POST(req: Request) {
     }, { status: 500 });
   }
 }
+
 
 

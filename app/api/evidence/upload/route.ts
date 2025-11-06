@@ -1,4 +1,4 @@
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { db } from '@/lib/db';
@@ -6,13 +6,19 @@ import { evidence, controlProgress, companies } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { geminiService } from '@/lib/ai/gemini';
 import { getControlById } from '@/lib/cmmc/controls';
+import { syncUser } from '@/lib/clerk/sync-user';
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
+    const { userId: clerkUserId } = await auth();
     
-    if (!session?.user?.id) {
+    if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await syncUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Failed to sync user' }, { status: 500 });
     }
 
     const formData = await req.formData();
@@ -73,7 +79,7 @@ export async function POST(req: Request) {
         fileUrl,
         fileType: file.type,
         fileSize: file.size,
-        uploaderId: session.user.id,
+        uploaderId: user.id,
         aiReviewStatus: validation.valid ? 'approved' : 'needs_rework',
         aiFeedback: validation.feedback,
         aiConfidence: validation.confidence,

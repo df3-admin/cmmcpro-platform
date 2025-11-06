@@ -1,13 +1,13 @@
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { geminiService } from '@/lib/ai/gemini';
 import { getControlById } from '@/lib/cmmc/controls';
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
+    const { userId } = await auth();
     
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

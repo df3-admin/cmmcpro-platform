@@ -1,12 +1,12 @@
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { integrationService } from '@/lib/integrations/service';
 
 export async function GET(req: Request) {
   try {
-    const session = await auth();
+    const { userId } = await auth();
     
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

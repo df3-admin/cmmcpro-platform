@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { companies, controlProgress, evidence } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { CONTROL_DATA } from '@/shared/controls';
+import { CMMC_DATA } from '@/lib/cmmc/controls';
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
+    const { userId } = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -43,8 +43,8 @@ export async function POST(request: Request) {
 
     // Build compliance matrix
     const matrix = controls.map(control => {
-      const controlData = CONTROL_DATA.level1.find(c => c.id === control.controlId) ||
-                          CONTROL_DATA.level2.find(c => c.id === control.controlId);
+      const controlData = CMMC_DATA.levels['1'].controls.find(c => c.id === control.controlId) ||
+                          CMMC_DATA.levels['2'].controls.find(c => c.id === control.controlId);
       
       const evidenceCount = evidenceCounts.find(e => e.controlId === control.controlId)?.count || 0;
 
@@ -87,4 +87,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
 

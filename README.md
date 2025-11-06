@@ -29,7 +29,7 @@ The TurboTax of CMMC compliance. An AI-powered platform to help businesses achie
 - **Language**: TypeScript
 - **Database**: Neon PostgreSQL (serverless)
 - **ORM**: Drizzle ORM
-- **Auth**: NextAuth.js v5
+- **Auth**: Clerk (with trial/subscription support)
 - **AI**: Google Gemini API
 - **Storage**: Vercel Blob
 - **UI**: shadcn/ui + Tailwind CSS
@@ -42,6 +42,7 @@ The TurboTax of CMMC compliance. An AI-powered platform to help businesses achie
 
 - Node.js 18+ installed
 - A Neon PostgreSQL database
+- Clerk account (for authentication)
 - Google Gemini API key (optional, for AI features)
 - Vercel Blob token (optional, for file storage)
 
@@ -60,23 +61,29 @@ npm install
 
 3. Set up environment variables:
 
-Create a `.env.local` file with:
-```env
-# Database (required)
-DATABASE_URL=your_neon_database_url
+Copy `.env.example` to `.env.local`:
+```bash
+cp .env.example .env.local
+```
 
-# Authentication (required)
-NEXTAUTH_SECRET=your_secret_key_here
-NEXTAUTH_URL=http://localhost:3000
+Update `.env.local` with your actual values:
+```env
+# Authentication (Clerk) - Get from https://dashboard.clerk.com
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxx
+CLERK_SECRET_KEY=sk_test_xxxxxxxx
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+
+# Database (Neon PostgreSQL)
+DATABASE_URL=your_neon_database_url
 
 # AI Features (optional but recommended)
 GEMINI_API_KEY=your_gemini_api_key
 
 # File Storage (optional but recommended)
 BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
-
-# Seed protection (production only)
-SEED_SECRET=your_seed_secret
 ```
 
 4. Push database schema to Neon:
@@ -84,44 +91,41 @@ SEED_SECRET=your_seed_secret
 npm run db:push
 ```
 
-5. Seed the database with initial data:
-```bash
-# Development
-curl http://localhost:3000/api/seed
-
-# Production
-curl https://your-domain.com/api/seed?secret=your_seed_secret
-```
-
-6. Start the development server:
+5. Start the development server:
 ```bash
 npm run dev
 ```
 
-7. Open [http://localhost:3000](http://localhost:3000) and login with:
-   - Username: `df3`
-   - Password: `1223`
+6. Open [http://localhost:3000](http://localhost:3000) and sign up with Clerk
+   - Click "Get Started" or "Sign Up"
+   - Create your account using email, Google, or other providers
+   - You'll be redirected to the dashboard after sign-up
 
 ## Deployment to Vercel
 
 1. Push your code to GitHub
 
-2. Import project in Vercel dashboard
+2. Set up Clerk for production:
+   - Go to https://dashboard.clerk.com
+   - Create a production instance
+   - Get your production API keys
 
-3. Add environment variables in Vercel:
-   - `DATABASE_URL` - Your Neon database URL (Vercel can auto-configure this)
-   - `NEXTAUTH_SECRET` - Generate with `openssl rand -base64 32`
-   - `NEXTAUTH_URL` - Your production URL
+3. Import project in Vercel dashboard
+
+4. Add environment variables in Vercel:
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Your Clerk publishable key
+   - `CLERK_SECRET_KEY` - Your Clerk secret key
+   - `NEXT_PUBLIC_CLERK_SIGN_IN_URL` - `/sign-in`
+   - `NEXT_PUBLIC_CLERK_SIGN_UP_URL` - `/sign-up`
+   - `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` - `/dashboard`
+   - `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` - `/dashboard`
+   - `DATABASE_URL` - Your Neon database URL
    - `GEMINI_API_KEY` - Your Google Gemini API key
-   - `BLOB_READ_WRITE_TOKEN` - Auto-configured by Vercel Blob
-   - `SEED_SECRET` - Secret for seeding production database
+   - `BLOB_READ_WRITE_TOKEN` - Vercel Blob token
 
-4. Deploy
+5. Deploy
 
-5. After deployment, seed the production database:
-```bash
-curl https://your-domain.vercel.app/api/seed?secret=your_seed_secret
-```
+6. Your app is now live! Users can sign up and start using CMMCPro
 
 ## Project Structure
 

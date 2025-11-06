@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = process.env.GEMINI_API_KEY 
@@ -8,7 +8,7 @@ const genAI = process.env.GEMINI_API_KEY
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
+    const { userId } = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -51,4 +51,5 @@ Format the policy professionally with clear sections and actionable guidance. Ma
     );
   }
 }
+
 

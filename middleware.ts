@@ -1,32 +1,28 @@
-import { auth } from '@/auth';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-export default auth((req) => {
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+]);
+
+const isOnboardingRoute = createRouteMatcher(['/onboarding(.*)']);
+
+export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth();
   const pathname = req.nextUrl.pathname;
-  const isLoggedIn = !!req.auth;
-  const isLoginPage = pathname === '/login';
-  const isHomePage = pathname === '/';
-  const isOnboardingPage = pathname.startsWith('/onboarding');
 
-  // Allow access to login and onboarding pages
-  if (isLoginPage || isOnboardingPage) {
-    if (isLoggedIn && !isOnboardingPage) {
-      return NextResponse.redirect(new URL('/dashboard', req.url));
-    }
-    return NextResponse.next();
-  }
-
-  // Redirect to login if not logged in
-  if (!isLoggedIn) {
-    if (isHomePage) {
-      return NextResponse.redirect(new URL('/login', req.url));
-    }
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
-
-  // Redirect root to dashboard if logged in
-  if (isHomePage && isLoggedIn) {
+  // Redirect authenticated users from home to dashboard
+  if (pathname === '/' && userId) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+
+  // Protect dashboard and company routes
+  if (!isPublicRoute(req) && !userId) {
+    const signInUrl = new URL('/sign-in', req.url);
+    signInUrl.searchParams.set('redirect_url', req.url);
+    return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();
@@ -34,15 +30,10 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - files with extensions (static files)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
 };
 

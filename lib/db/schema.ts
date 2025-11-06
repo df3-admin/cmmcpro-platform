@@ -4,9 +4,9 @@ import { relations } from 'drizzle-orm';
 // Users table
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
-  username: varchar('username', { length: 255 }).unique().notNull(),
-  email: varchar('email', { length: 255 }).unique(),
-  passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+  clerkUserId: varchar('clerk_user_id', { length: 255 }).unique().notNull(),
+  username: varchar('username', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).unique().notNull(),
   role: varchar('role', { length: 50 }).default('user').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

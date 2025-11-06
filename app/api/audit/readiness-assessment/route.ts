@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { companies, controlProgress, evidence, policies, integrations } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
+    const { userId } = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -174,4 +174,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
 

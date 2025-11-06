@@ -1,13 +1,19 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { policies } from '@/lib/db/schema';
+import { syncUser } from '@/lib/clerk/sync-user';
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await syncUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Failed to sync user' }, { status: 500 });
     }
 
     const { companyId, title, content, controlIds, status } = await request.json();
@@ -28,8 +34,8 @@ export async function POST(request: Request) {
         version: '1.0',
         status: status || 'draft',
         controlIds: controlIds || [],
-        createdBy: session.user.id,
-        approvedBy: status === 'approved' ? session.user.id : null,
+        createdBy: user.id,
+        approvedBy: status === 'approved' ? user.id : null,
         approvedAt: status === 'approved' ? new Date() : null,
       })
       .returning();

@@ -1,4 +1,4 @@
-import { auth } from '@/auth';
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { userCompanies, companies } from '@/lib/db/schema';
@@ -9,10 +9,10 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
-  const session = await auth();
+  const { userId } = await auth();
   
   if (!session?.user?.id) {
-    redirect('/login');
+    redirect('/sign-in');
   }
 
   // Get user's companies
@@ -77,4 +77,5 @@ export default async function DashboardPage() {
     </div>
   );
 }
+
 

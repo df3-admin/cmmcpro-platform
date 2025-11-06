@@ -1,19 +1,21 @@
-import { auth } from '@/auth';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { ShieldCheck, LogOut } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import { UserButton } from '@clerk/nextjs';
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const { userId } = await auth();
 
-  if (!session) {
-    redirect('/login');
+  if (!userId) {
+    redirect('/sign-in');
   }
+
+  const user = await currentUser();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -26,18 +28,9 @@ export default async function DashboardLayout({
             </Link>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">
-                Welcome, {session.user?.name}
+                Welcome, {user?.firstName || user?.username || 'User'}
               </span>
-              <form action={async () => {
-                'use server';
-                const { signOut } = await import('@/auth');
-                await signOut();
-              }}>
-                <Button variant="ghost" size="sm" type="submit">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
-              </form>
+              <UserButton afterSignOutUrl="/" />
             </div>
           </div>
         </div>
@@ -48,4 +41,5 @@ export default async function DashboardLayout({
     </div>
   );
 }
+
 
