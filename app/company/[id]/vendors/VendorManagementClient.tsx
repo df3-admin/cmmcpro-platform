@@ -28,13 +28,13 @@ import {
 interface Vendor {
   id: string;
   name: string;
-  contactEmail?: string;
-  riskScore?: number;
+  contactEmail?: string | null;
+  riskScore?: number | null;
   assessmentStatus: string;
   hasAccess: boolean;
-  accessDetails?: string;
-  contractStart?: Date;
-  contractEnd?: Date;
+  accessDetails?: string | null;
+  contractStart?: Date | null;
+  contractEnd?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
